@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AreaLab – Tính diện tích hình phẳng bằng tích phân</title>
+  <meta name="description" content="Công cụ trực quan hóa và tính diện tích hình phẳng bằng tích phân: nhập hàm, xem miền, hiểu cận tích phân và lấy mã LaTeX (TikZ/PGFPlots). Thầy Tâm – Giáo viên Toán.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231C2E58'/%3E%3Ctext x='32' y='47' font-size='42' text-anchor='middle' fill='white' font-family='serif' font-style='italic'%3E%E2%88%AB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script defer src="https://cdn.plot.ly/plotly-basic-2.35.2.min.js"></script>
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#calc-form">Bỏ qua tới phần nhập dữ liệu</a>
+
+  <header class="top reveal">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">∫</span>
+      <div>
+        <h1>AreaLab</h1>
+        <p class="subtitle">Công cụ trực quan hóa và tính diện tích hình phẳng bằng tích phân.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button type="button" id="open-guide" class="btn ghost">Hướng dẫn gõ</button>
+      <button type="button" id="open-examples" class="btn ghost">Ví dụ mẫu</button>
+      <button type="button" id="study-toggle" class="switch" role="switch" aria-checked="false">
+        <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+        <span class="switch-label">Chế độ học tập</span>
+      </button>
+    </div>
+  </header>
+
+  <ol class="flow reveal" id="flow" aria-label="Quy trình từ hàm số đến mã LaTeX">
+    <li data-node="parse"><span class="node-dot"></span><span class="node-name">Hàm số</span></li>
+    <li data-node="intersections"><span class="node-dot"></span><span class="node-name">Giao điểm</span></li>
+    <li data-node="region"><span class="node-dot"></span><span class="node-name">Miền hình phẳng</span></li>
+    <li data-node="integral"><span class="node-dot"></span><span class="node-name">Tích phân</span></li>
+    <li data-node="area"><span class="node-dot"></span><span class="node-name">Diện tích</span></li>
+    <li data-node="graph"><span class="node-dot"></span><span class="node-name">Hình vẽ</span></li>
+    <li data-node="latex"><span class="node-dot"></span><span class="node-name">Mã LaTeX</span></li>
+  </ol>
+
+  <main class="workbench">
+    <section class="card input-card reveal" aria-labelledby="input-title">
+      <div class="card-head">
+        <h2 id="input-title">Tính diện tích hình phẳng</h2>
+      </div>
+
+      <form id="calc-form" novalidate autocomplete="off">
+        <div class="field">
+          <label for="f1"><span class="fn">f(x) =</span></label>
+          <input id="f1" name="f1" class="math-input" type="text" inputmode="text" spellcheck="false" value="x^2" aria-describedby="f1-live">
+          <div id="f1-live" class="live" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <label for="f2"><span class="fn">g(x) =</span></label>
+          <input id="f2" name="f2" class="math-input" type="text" inputmode="text" spellcheck="false" value="2*x+3/2" aria-describedby="f2-live">
+          <div id="f2-live" class="live" aria-live="polite"></div>
+          <p class="hint">Nhập <b>0</b> để tính diện tích giới hạn bởi đồ thị và trục Ox.</p>
+        </div>
+
+        <p class="syntax-quick">
+          <span><code>*</code> nhân</span><span><code>/</code> chia</span><span><code>^</code> hoặc <code>**</code> mũ</span>
+          <button type="button" class="btn link" id="open-guide-inline">Xem hướng dẫn gõ đầy đủ</button>
+        </p>
+
+        <fieldset class="bounds">
+          <legend>Cận tích phân</legend>
+          <div class="segmented" role="radiogroup" aria-label="Cách xác định cận">
+            <button type="button" role="radio" id="mode-manual" aria-checked="true">Nhập cận</button>
+            <button type="button" role="radio" id="mode-auto" aria-checked="false">Tìm giao điểm tự động</button>
+          </div>
+
+          <div id="bounds-manual" class="bounds-row">
+            <div class="field inline">
+              <label for="a"><span class="fn">a =</span></label>
+              <input id="a" name="a" class="math-input" type="text" inputmode="text" spellcheck="false" value="-3">
+              <div id="a-live" class="live" aria-live="polite"></div>
+            </div>
+            <div class="field inline">
+              <label for="b"><span class="fn">b =</span></label>
+              <input id="b" name="b" class="math-input" type="text" inputmode="text" spellcheck="false" value="1">
+              <div id="b-live" class="live" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <div id="bounds-auto" class="bounds-auto" hidden>
+            <p class="hint">Hệ thống giải <b>f(x) = g(x)</b>, lấy các giao điểm làm mốc và tính diện tích giữa giao điểm đầu và cuối.</p>
+            <button type="button" id="btn-find" class="btn secondary">Tự động tìm giao điểm</button>
+            <div id="roots" class="roots" aria-live="polite"></div>
+            <button type="button" id="btn-use-roots" class="btn link" hidden>Dùng làm cận a, b</button>
+          </div>
+        </fieldset>
+
+        <button type="submit" id="btn-calc" class="btn primary big">Tính diện tích</button>
+      </form>
+
+      <ul id="status" class="status" aria-live="polite"></ul>
+      <div id="error" class="error" role="alert" hidden></div>
+    </section>
+
+    <section class="card graph-card reveal" aria-labelledby="graph-title">
+      <div class="card-head">
+        <h2 id="graph-title">Đồ thị</h2>
+        <div class="graph-actions">
+          <button type="button" id="btn-reset" class="btn ghost small">Đặt lại khung nhìn</button>
+          <button type="button" id="btn-png" class="btn ghost small">Tải hình PNG</button>
+          <button type="button" id="btn-svg" class="btn ghost small">Tải hình SVG</button>
+        </div>
+      </div>
+      <div class="toggles" role="group" aria-label="Hiển thị trên đồ thị">
+        <label class="chip"><input type="checkbox" id="t-f" checked><span class="swatch f"></span>f(x)</label>
+        <label class="chip"><input type="checkbox" id="t-g" checked><span class="swatch g"></span>g(x)</label>
+        <label class="chip"><input type="checkbox" id="t-area" checked><span class="swatch area"></span>Vùng diện tích</label>
+        <label class="chip"><input type="checkbox" id="t-grid" checked>Lưới</label>
+        <label class="chip"><input type="checkbox" id="t-coords" checked>Tọa độ giao điểm</label>
+        <label class="chip"><input type="checkbox" id="t-equal">Tỉ lệ 1 : 1</label>
+      </div>
+      <div class="plot-wrap">
+        <div id="plot" aria-label="Đồ thị hàm số và miền hình phẳng" role="img"></div>
+        <div id="plot-empty" class="plot-empty">Đang chuẩn bị đồ thị…</div>
+      </div>
+      <p class="hint plot-hint">Kéo để di chuyển, cuộn chuột hoặc chụm hai ngón để phóng to/thu nhỏ; đường cong luôn được vẽ tiếp theo khung nhìn.</p>
+    </section>
+  </main>
+
+  <section class="card results reveal" aria-label="Kết quả">
+    <div class="tabs" role="tablist" aria-label="Kết quả tính toán">
+      <button role="tab" id="tab-result" aria-controls="panel-result" aria-selected="true">Kết quả</button>
+      <button role="tab" id="tab-steps" aria-controls="panel-steps" aria-selected="false" tabindex="-1">Các bước giải</button>
+      <button role="tab" id="tab-latex" aria-controls="panel-latex" aria-selected="false" tabindex="-1">Mã LaTeX</button>
+      <span class="tab-ink" aria-hidden="true"></span>
+    </div>
+    <div id="panel-result" role="tabpanel" aria-labelledby="tab-result" class="panel">
+      <p class="empty">Nhập hàm số rồi nhấn <b>Tính diện tích</b> để xem giao điểm, cận, công thức và đáp số.</p>
+    </div>
+    <div id="panel-steps" role="tabpanel" aria-labelledby="tab-steps" class="panel" hidden></div>
+    <div id="panel-latex" role="tabpanel" aria-labelledby="tab-latex" class="panel" hidden></div>
+  </section>
+
+  <footer class="foot reveal" id="site-footer"></footer>
+
+  <dialog id="examples-dialog" aria-labelledby="examples-title">
+    <div class="dialog-head">
+      <h2 id="examples-title">Ví dụ mẫu</h2>
+      <button type="button" id="close-examples" class="btn ghost small" aria-label="Đóng">Đóng</button>
+    </div>
+    <div id="examples-body"></div>
+  </dialog>
+
+  <dialog id="guide-dialog" class="wide-dialog" aria-labelledby="guide-title">
+    <div class="dialog-head">
+      <h2 id="guide-title">Hướng dẫn gõ hàm số</h2>
+      <button type="button" id="close-guide" class="btn ghost small" aria-label="Đóng">Đóng</button>
+    </div>
+    <div id="guide-body"></div>
+  </dialog>
+
+  <noscript><p class="error" style="margin:1rem">Trang cần JavaScript để hoạt động.</p></noscript>
+</body>
+</html>
