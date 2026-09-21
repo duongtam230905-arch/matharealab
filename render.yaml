@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: arealab
+    runtime: docker
+    plan: starter        # gói free (512 MB) có thể thiếu RAM khi SymPy + pdflatex chạy cùng lúc
+    healthCheckPath: /api/health
+    envVars:
+      - key: WORKERS
+        value: "2"
+      - key: CALC_TIMEOUT
+        value: "30"
